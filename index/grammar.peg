@@ -1,0 +1,132 @@
+{
+  package main
+
+  type m map[string]interface{}
+
+  func main() {
+      if len(os.Args) != 2 {
+          log.Fatal("Usage: calculator 'EXPR'")
+      }
+      got, err := ParseReader("", strings.NewReader(os.Args[1]))
+      if err != nil {
+          log.Fatal(err)
+      }
+      fmt.Printf("= %#v\n", got)
+  }
+  
+  /*
+
+  func eval(first, rest interface{}) int {
+      l := first.(int)
+      restSl := toIfaceSlice(rest)
+      for _, v := range restSl {
+          restExpr := toIfaceSlice(v)
+          r := restExpr[3].(int)
+          op := restExpr[1].(string)
+          l = ops[op](l, r)
+      }
+      return l
+  }*/
+  
+  
+  func toIfaceSlice(v interface{}) []interface{} {
+    if v == nil {
+        return nil
+    }
+    return v.([]interface{})
+  }
+  
+  func eval(first, rest interface{}) {
+    restSl := toIfaceSlice(rest)
+      for _, v := range restSl {
+          restExpr := toIfaceSlice(v)
+          
+          fmt.Printf("%v\n", restExpr)
+      }
+      
+  }
+  
+  func term(p, c, q interface{}) m {
+    return m{
+      "path": p,
+      "comparer": c,
+      "query": q,
+    }
+  }
+
+}
+
+
+Input <- e:Expression EOF {
+  return e, nil
+}
+
+Expression <- _ first:Term rest:( _ g:Group _ Factor)* {
+  eval(first, rest)
+  return first, nil
+}
+
+Term <- p:Path _ cmp:Comparer _ q:Query {
+  
+  return term(p, cmp, q), nil
+}
+
+Factor <- '(' expr:Expression ')' {
+    return expr, nil
+} / t:Term {
+    return t, nil
+}
+
+Group <- a:And {
+  return a, nil
+} / o:Or {
+  return o, nil
+}
+
+And <- ( "and" / "&&" / "&" ) {
+  return "$and", nil
+}
+
+Or <- ( "or" / "||" / "|" ) {
+  return "$or", nil
+}
+
+Query <- n:Number {
+  return n, nil
+} / s:String {
+  return s, nil 
+}
+
+Comparer <- ( '='  / ":" / ">" / "<" ) {
+  return string(c.text), nil
+}
+
+
+Path <- [a-zA-Z.]+ {
+  return string(c.text), nil
+}
+
+Number <- [0-9.]+ {
+  return string(c.text), nil
+}
+
+String ← '"' ( !EscapedChar . / '\\' EscapeSequence )* '"' {
+    // TODO : the forward slash (solidus) is not a valid escape in Go, it will
+    // fail if there's one in the string
+    return strconv.Unquote(string(c.text))
+}
+
+EscapedChar ← [\x00-\x1f"\\]
+
+EscapeSequence ← SingleCharEscape / UnicodeEscape
+
+SingleCharEscape ← ["\\/bfnrt]
+
+UnicodeEscape ← 'u' HexDigit HexDigit HexDigit HexDigit
+
+HexDigit ← [0-9a-f]i
+
+
+_ "whitespace" <- [ \n\t\r]*
+
+EOF <- !.
