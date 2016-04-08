@@ -22,7 +22,7 @@ func (self *Bucket) Remove(key []byte, value interface{}) error {
 }
 
 func (self *Bucket) Get(key []byte) error {
-
+    return nil
 }
 
 func (slf *Bucket) Query() *Query {

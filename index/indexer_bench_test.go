@@ -8,7 +8,7 @@ import (
 
 	"github.com/Pallinder/go-randomdata"
 	"github.com/boltdb/bolt"
-	"github.com/kildevaeld/percy/utils"
+	"github.com/kildevaeld/dict"
 
 	. "gopkg.in/check.v1"
 )
@@ -43,23 +43,23 @@ func (self *IndexerBenchTestSuite) SetUpSuite(c *C) {
 		},
 	}
 
-	err = i.UpdateIndexSet(indexes, func(key []byte) utils.Map {
-		if v, ok := values[string(key)].(utils.Map); ok {
+	err = i.UpdateIndexSet(indexes, func(key []byte) dict.Map {
+		if v, ok := values[string(key)].(dict.Map); ok {
 			return v
 		}
 		return nil
 	})
 
 	for ii := 0; ii < 10000; ii++ {
-		i.UpdateIndex([]byte(fmt.Sprintf("id%d", ii)), utils.Map{
+		i.UpdateIndex([]byte(fmt.Sprintf("id%d", ii)), dict.Map{
 			"name": randomdata.FirstName(randomdata.Male),
 			"age":  rand.Intn(80),
 		})
 	}
 
-	i.UpdateIndex([]byte("id1"), values["id1"].(utils.Map))
-	i.UpdateIndex([]byte("id2"), values["id2"].(utils.Map))
-	i.UpdateIndex([]byte("id3"), values["id3"].(utils.Map))
+	i.UpdateIndex([]byte("id1"), values["id1"].(dict.Map))
+	i.UpdateIndex([]byte("id2"), values["id2"].(dict.Map))
+	i.UpdateIndex([]byte("id3"), values["id3"].(dict.Map))
 
 	self.index = i
 	self.store = db
@@ -105,8 +105,8 @@ func BenchmarkIndex(b *testing.B) {
 		},
 	}
 
-	err = i.UpdateIndexSet(indexes, func(key []byte) utils.Map {
-		if v, ok := values[string(key)].(utils.Map); ok {
+	err = i.UpdateIndexSet(indexes, func(key []byte) dict.Map {
+		if v, ok := values[string(key)].(dict.Map); ok {
 			return v
 		}
 		return nil
@@ -117,7 +117,7 @@ func BenchmarkIndex(b *testing.B) {
 	b.ResetTimer()
 
 	for ii := 0; ii < b.N; ii++ {
-		i.UpdateIndex([]byte("id2"), values["id2"].(utils.Map))
+		i.UpdateIndex([]byte("id2"), values["id2"].(dict.Map))
 	}
 
 	db.View(func(t *bolt.Tx) error {
@@ -155,23 +155,23 @@ func BenchmarkQuery(b *testing.B) {
 		},
 	}
 
-	err = i.UpdateIndexSet(indexes, func(key []byte) utils.Map {
-		if v, ok := values[string(key)].(utils.Map); ok {
+	err = i.UpdateIndexSet(indexes, func(key []byte) dict.Map {
+		if v, ok := values[string(key)].(dict.Map); ok {
 			return v
 		}
 		return nil
 	})
 
 	for ii := 0; ii < 1000; ii++ {
-		i.UpdateIndex([]byte(fmt.Sprintf("id%d", ii)), utils.Map{
+		i.UpdateIndex([]byte(fmt.Sprintf("id%d", ii)), dict.Map{
 			"name": randomdata.FirstName(randomdata.Male),
 			"age":  rand.Intn(80),
 		})
 	}
 
-	err = i.UpdateIndex([]byte("id1"), values["id1"].(utils.Map))
-	i.UpdateIndex([]byte("id2"), values["id2"].(utils.Map))
-	i.UpdateIndex([]byte("id3"), values["id3"].(utils.Map))
+	err = i.UpdateIndex([]byte("id1"), values["id1"].(dict.Map))
+	i.UpdateIndex([]byte("id2"), values["id2"].(dict.Map))
+	i.UpdateIndex([]byte("id3"), values["id3"].(dict.Map))
 	if err != nil {
 		b.Error(err)
 	}

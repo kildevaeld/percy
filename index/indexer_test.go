@@ -9,6 +9,7 @@ import (
 
 	"github.com/Pallinder/go-randomdata"
 	"github.com/boltdb/bolt"
+	"github.com/kildevaeld/dict"
 	"github.com/kildevaeld/percy/utils"
 
 	. "gopkg.in/check.v1"
@@ -62,8 +63,8 @@ func (self *IndexerTestSuite) TestUpdateIndexSet(c *C) {
 		},
 	}
 
-	err = i.UpdateIndexSet(indexes, func(key []byte) utils.Map {
-		if v, ok := values[string(key)].(utils.Map); ok {
+	err = i.UpdateIndexSet(indexes, func(key []byte) dict.Map {
+		if v, ok := values[string(key)].(dict.Map); ok {
 			return v
 		}
 		return nil
@@ -126,8 +127,8 @@ func (self *IndexerTestSuite) TestFind(c *C) {
 		},
 	}
 
-	err = i.UpdateIndexSet(indexes, func(key []byte) utils.Map {
-		if v, ok := values[string(key)].(utils.Map); ok {
+	err = i.UpdateIndexSet(indexes, func(key []byte) dict.Map {
+		if v, ok := values[string(key)].(dict.Map); ok {
 			return v
 		}
 		return nil
