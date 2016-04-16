@@ -374,18 +374,18 @@ func Open(config StoreConfig) (*Store, error) {
 }
 
 func initBoltDB(path string, config StoreConfig) (*bolt.DB, error) {
-	idb, err := bolt.Open(path, 0600, &bolt.Options{
+	idb, err := bolt.Open(path, 0777, &bolt.Options{
 		ReadOnly:   config.ReadOnly,
 		Timeout:    config.Timeout,
 		NoGrowSync: config.NoGrowSync,
 		MmapFlags:  config.MmapFlags,
 	})
 
-	idb.NoSync = config.NoSync
-
 	if err != nil {
 		return nil, err
 	}
+
+	idb.NoSync = config.NoSync
 
 	return idb, err
 }
@@ -403,9 +403,10 @@ func NewStore(config StoreConfig) (*Store, error) {
 
 	var stats os.FileInfo
 	if stats, err = os.Stat(config.Path); err != nil {
-		if err = os.MkdirAll(config.Path, 0600); err != nil {
+		if err = os.MkdirAll(config.Path, 0777); err != nil {
 			return nil, err
 		}
+		stats, err = os.Stat(config.Path)
 	}
 
 	if !stats.IsDir() {
