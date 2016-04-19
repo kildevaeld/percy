@@ -84,7 +84,7 @@ func (self *Store) update_meta(t *bolt.Tx) error {
 
 // Init initializes the store.
 // FIXME: This should be an unexported method, called only by Open
-func (self *Store) Init() error {
+func (self *Store) init() error {
 
 	return self.datadb.Update(func(t *bolt.Tx) error {
 		self.lock.Lock()

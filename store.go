@@ -354,7 +354,7 @@ func (self *Store) Debug(debug bool) {
 // Open opens a new instanceof of a database from given path.
 func Open(config StoreConfig) (*Store, error) {
 
-	store, err := NewStore(config)
+	store, err := newStore(config)
 
 	if err != nil {
 		return nil, err
@@ -364,7 +364,7 @@ func Open(config StoreConfig) (*Store, error) {
 
 	store.log("using encoding %s", config.Encoding)
 
-	err = store.Init()
+	err = store.init()
 
 	if err != nil {
 		return nil, err
@@ -391,7 +391,7 @@ func initBoltDB(path string, config StoreConfig) (*bolt.DB, error) {
 }
 
 // TODO: Turn this into a private method
-func NewStore(config StoreConfig) (*Store, error) {
+func newStore(config StoreConfig) (*Store, error) {
 
 	dbPath := filepath.Join(config.Path, dataDB)
 	qPath := filepath.Join(config.Path, graphDB)
@@ -403,7 +403,7 @@ func NewStore(config StoreConfig) (*Store, error) {
 
 	var stats os.FileInfo
 	if stats, err = os.Stat(config.Path); err != nil {
-		if err = os.MkdirAll(config.Path, 0777); err != nil {
+		if err = os.MkdirAll(config.Path, 0766); err != nil {
 			return nil, err
 		}
 		stats, err = os.Stat(config.Path)

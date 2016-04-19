@@ -75,57 +75,6 @@ func (self *Store) Query(bucketName []byte, query index.Comparer) *Query {
 	}
 }
 
-/*func (self *Store) Find(bucketName []byte, query []index.Comparer, result interface{}) error {
-
-	resultv := reflect.ValueOf(result)
-	if resultv.Kind() != reflect.Ptr || resultv.Elem().Kind() != reflect.Slice {
-		panic("result argument must be a slice address")
-	}
-
-	slicev := resultv.Elem()
-
-	elemt := slicev.Type().Elem()
-
-	in := self.indexes[string(bucketName)]
-
-	if in == nil {
-		return fmt.Errorf("no index for type %s", bucketName)
-	}
-	i := 0
-
-	var err error
-	err = self.datadb.View(func(t *bolt.Tx) error {
-
-		bucket := t.Bucket([]byte(bucketName))
-
-		err = in.Find(query, func(q index.Comparer, key []byte, ids []byte) error {
-			item := bucket.Get(ids)
-
-			if slicev.Len() == i {
-				elemp := reflect.New(elemt)
-
-				err = self.s.Deserialize(item, elemp.Interface())
-
-				if err == nil {
-					slicev = reflect.Append(slicev, elemp.Elem())
-					i++
-				} else {
-					return err
-				}
-			}
-
-			return nil
-		})
-
-		return err
-	})
-
-	resultv.Elem().Set(slicev.Slice(0, i))
-
-	return err
-
-}*/
-
 func (self *Store) Get(bucket []byte, id interface{}, item interface{}) error {
 	var idBytes []byte
 

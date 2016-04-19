@@ -17,16 +17,12 @@ func (self *Store) AddLink(subject, predicate, object string) error {
 	return self.graphdb.AddQuad(cayley.Quad(subject.ACLIdentifier(), predicate, object.ACLIdentifier(), ""))
 }*/
 
-func (self *Store) RemoveLink2(subject, predicate, object string) error {
+func (self *Store) RemoveLink(subject, predicate, object string) error {
 	return self.graphdb.RemoveQuad(cayley.Quad(subject, predicate, object, ""))
 }
 
 func (self *Store) RemoveQuad(q quad.Quad) error {
 	return self.graphdb.RemoveQuad(q)
-}
-
-func (self *Store) RemoveLink(predicate, object Item, subject string) error {
-	return self.graphdb.RemoveQuad(cayley.Quad(predicate.ACLIdentifier(), subject, object.ACLIdentifier(), ""))
 }
 
 func (self *Store) Graph(start ...string) *path.Path {
@@ -45,15 +41,12 @@ func (self *Store) Quads(key []byte, dir quad.Direction, fn func(q quad.Quad) er
 	}
 
 	for cayley.RawNext(it) {
-
 		ii := self.graphdb.QuadIterator(dir, it.Result())
-
 		for cayley.RawNext(ii) {
 			if err := fn(self.graphdb.Quad(ii.Result())); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	return nil
