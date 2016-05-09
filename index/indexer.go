@@ -105,32 +105,6 @@ func (self *Indexer) Find(query Comparer, fn func(q Comparer, k []byte, v []byte
 
 	var wg sync.WaitGroup
 
-	/*worker := func() {
-		for {
-			select {
-			case result := <-ch:
-				if result == nil {
-					//wg.Done()
-					return
-				}
-				wg.Add(1)
-
-				for _, i := range result.Entry.Entries {
-					fn(result.Query, result.Entry.Id, i)
-				}
-
-				self.entryPool.Put(result.Entry)
-				result.Entry = nil
-				self.pool.Put(result)
-				wg.Done()
-
-			default:
-				// Run along
-			}
-
-		}
-	}*/
-
 	worker := func(result *QueryResult) {
 
 		for _, i := range result.Entry.Entries {
@@ -297,40 +271,6 @@ func (self *Indexer) updateIndex(key []byte, index Index, m utils.Map, entry *En
 			return err
 		}
 
-		/*fi := bytes.Index(predicate[:prefixLen+size], space)
-		li := bytes.LastIndex(predicate[:prefixLen+size], space)
-
-		s := 0
-		if fi != li && li > -1 {
-
-			for li != fi && li > 0 {
-
-				copy(tmp[prefixLen:], predicate[li+1:size+prefixLen])
-
-				li = bytes.LastIndex(predicate[:prefixLen+size-(prefixLen+(size-li))], space)
-				s = (size - li) + 2
-
-				self.updateIndexForPredicate(key, entry, tmp[:s], s)
-				copy(tmp, predicate[:prefixLen+1])
-				if li == fi {
-					copy(tmp[prefixLen:], predicate[li+1:])
-
-					s += fi
-
-					self.updateIndexForPredicate(key, entry, tmp[:s+fi], s+fi)
-				}
-			}
-		} else if fi > -1 && fi == li {
-			s = copy(tmp[prefixLen:], predicate[li+1:size+prefixLen])
-
-			var ttmp []byte
-			//copy(ttmp, tmp[:s-prefixLen])
-			//li = bytes.LastIndex(predicate[:prefixLen+size-(prefixLen+(size-li))], space)
-			//s = prefixLen + fi
-			fmt.Printf("WHAT %v\n",ttmp)
-			//self.updateIndexForPredicate(key, entry, tmp[:s+prefix], s+prefixLen)
-		}*/
-
 		//fmt.Printf("PRedicate %s - %d - %d - %d\n", predicate[:prefixLen+size], size, prefixLen)
 		return self.updateIndexForPredicate(key, entry, predicate[:prefixLen+size], prefixLen+size)
 
@@ -396,7 +336,6 @@ func (self *Indexer) createPredicate(b *bolt.Bucket, predicate []byte, key []byt
 	val := b.Get(predicate)
 
 	if val == nil {
-
 		entry.Entries = [][]byte{key}
 	} else {
 		entry.Unmarshal(val)

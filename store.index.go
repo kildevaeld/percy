@@ -77,8 +77,9 @@ func (self *Store) ensureIndex(t *bolt.Tx, bucket string, v interface{}, update 
 
 	finder := func(bucket string) func([]byte) dict.Map {
 		return func(key []byte) dict.Map {
-
-			return nil
+			var out dict.Map
+			self.Get([]byte(bucket), key, &out)
+			return out
 		}
 	}
 

@@ -2,9 +2,9 @@ package percy
 
 import (
 	"encoding/json"
-	"sync"
-
 	"github.com/kildevaeld/dict"
+	"github.com/kildevaeld/percy/serializer"
+	"sync"
 )
 
 type Value struct {
@@ -66,6 +66,11 @@ func NewValue(key, value []byte, s Serializer) *Value {
 	v.key = key
 	v.value = value
 	v.s = s
+
+	if s == nil {
+		v.s = serializer.NewSerializer(serializer.MsgPack)
+	}
+
 	return v
 }
 

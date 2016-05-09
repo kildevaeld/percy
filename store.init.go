@@ -10,7 +10,6 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/google/cayley"
-	"github.com/google/cayley/exporter"
 	"github.com/google/cayley/quad"
 	"github.com/hashicorp/go-multierror"
 	"github.com/kildevaeld/percy/index"
@@ -291,15 +290,15 @@ func (self *Store) Export(path string) (int64, error) {
 	}
 	written += n
 
-	cf, ce := zipfile.Create("graphs")
+	/*cf, ce := zipfile.Create("graphs")
 
 	if ce != nil {
 		return 0, ce
-	}
+	}*/
 
-	ex := exporter.NewExporter(cf, self.graphdb.QuadStore)
+	//ex := exporter.NewExporter(cf, self.graphdb.QuadStore)
 
-	ex.ExportQuad()
+	//ex.ExportQuad()
 
 	// META
 	meta := self.Meta()

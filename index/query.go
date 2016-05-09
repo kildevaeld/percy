@@ -3,11 +3,11 @@ package index
 import (
 	"bytes"
 	"fmt"
+	"github.com/kildevaeld/dict"
+	"github.com/kildevaeld/percy/utils"
 	"strconv"
 	"strings"
 	"unicode"
-
-	"github.com/kildevaeld/percy/utils"
 )
 
 func getNumber(name string) (new_s int) {
@@ -52,12 +52,18 @@ func compile(p []byte, q interface{}) []byte {
 type Comparer interface {
 	Paths() []string
 	Compare(path string, v, k []byte) bool
+	WriteMap(dict.Map) error
 }
 
 type equal struct {
 	Query  interface{}
 	Path   string
 	prefix []byte
+}
+
+func (self *equal) WriteMap(m dict.Map) error {
+	m[self.Path] = self.Query
+	return nil
 }
 
 func (self *equal) getPrefix() []byte {
@@ -90,6 +96,11 @@ type Greater struct {
 	Query  interface{}
 	Path   string
 	prefix []byte
+}
+
+func (self *Greater) WriteMap(m dict.Map) error {
+	m[self.Path] = self.Query
+	return nil
 }
 
 func (self *Greater) getPrefix() []byte {
@@ -133,6 +144,11 @@ type Lesser struct {
 	prefix []byte
 }
 
+func (self *Lesser) WriteMap(m dict.Map) error {
+	m[self.Path] = self.Query
+	return nil
+}
+
 func (self *Lesser) getPrefix() []byte {
 	if self.prefix == nil {
 		self.prefix = compile([]byte(self.Path), self.Query)
@@ -173,6 +189,11 @@ type Prefix struct {
 	prefix []byte
 }
 
+func (self *Prefix) WriteMap(m dict.Map) error {
+	m[self.Path] = self.Query
+	return nil
+}
+
 func (self *Prefix) getPrefix() []byte {
 	if self.prefix == nil {
 		self.prefix = compile([]byte(self.Path), self.Query)
@@ -198,6 +219,11 @@ type Suffix struct {
 	Path   string
 	prefix []byte
 	q      []byte
+}
+
+func (self *Suffix) WriteMap(m dict.Map) error {
+	m[self.Path] = self.Query
+	return nil
 }
 
 func (self *Suffix) getPrefix() []byte {
@@ -234,6 +260,11 @@ type Contains struct {
 	q      []byte
 }
 
+func (self *Contains) WriteMap(m dict.Map) error {
+	m[self.Path] = self.Query
+	return nil
+}
+
 func (self *Contains) getPrefix() []byte {
 	if self.prefix == nil {
 		self.prefix = compile([]byte(self.Path), self.Query)
@@ -264,6 +295,20 @@ func (self *Contains) String() string {
 type and struct {
 	queries []Comparer
 	found   map[string]int
+}
+
+func (self *and) WriteMap(m dict.Map) error {
+	out := dict.NewMap()
+
+	for _, q := range self.queries {
+		if e := q.WriteMap(out); e != nil {
+			return e
+		}
+	}
+
+	m["$and"] = out
+
+	return nil
 }
 
 func (self *and) Compare(path string, v, key []byte) bool {
@@ -308,6 +353,20 @@ func And(queries ...Comparer) Comparer {
 type or struct {
 	queries []Comparer
 	//found map[]
+}
+
+func (self *or) WriteMap(m dict.Map) error {
+	out := dict.NewMap()
+
+	for _, q := range self.queries {
+		if e := q.WriteMap(out); e != nil {
+			return e
+		}
+	}
+
+	m["$or"] = out
+
+	return nil
 }
 
 func (self *or) Compare(p string, v, s []byte) bool {
